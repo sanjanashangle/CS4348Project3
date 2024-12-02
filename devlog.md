@@ -25,4 +25,7 @@
 - Debug the printing index section and figure out why I keep getting a warning
 
 ### Progress:
-- Will fill out after I am done working for this session
+- No longer getting a warning with Printing Index - still some minor errors
+
+----------------------------
+
