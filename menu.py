@@ -64,7 +64,8 @@ def main():
         
         elif choice == '4':  # Search Key
             key = int(input("Enter the key to search for: "))
-            btree.search(key)
+            filename = input("Enter the filename to search in: ")  # Prompt for the filename
+            btree.search(filename, key)
         
         elif choice == '5':  # Load Key-Value Pairs from File
             load_key_value_pairs()
