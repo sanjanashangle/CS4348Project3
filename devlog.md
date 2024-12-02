@@ -14,3 +14,15 @@
 - Having issues with printing the index - stopped working for the day here (will pick up on this next time I work)
 
 ----------------------------
+
+## December 2 12:08PM
+
+### Thoughts so far:
+- Going good so far - making good progress
+- I would say I'm in a good place as I am not procrastinating
+
+### Plan for the session:
+- Debug the printing index section and figure out why I keep getting a warning
+
+### Progress:
+- Will fill out after I am done working for this session
