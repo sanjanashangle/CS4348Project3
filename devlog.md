@@ -40,4 +40,5 @@
 - Finish working on the 'Print Index'
 
 ### Progress:
-- Will Update after I am done working for this session
+- Finished the 'Search Key' and 'Print Index'
+- Most componenets are fully functional, just need to do last minute verifications before submitting now
