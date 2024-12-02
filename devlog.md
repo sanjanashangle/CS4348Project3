@@ -29,3 +29,15 @@
 
 ----------------------------
 
+## December 2 2:30PM
+
+### Thoughts so far:
+- Going good so far - making good progress
+- I would say I'm in a good place as I am not procrastinating
+
+### Plan for the session:
+- Work on the 'Search Key' as I am getting some errors
+- Finish working on the 'Print Index'
+
+### Progress:
+- Will Update after I am done working for this session
