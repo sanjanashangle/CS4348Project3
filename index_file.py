@@ -125,7 +125,31 @@ def print_index(filename):
                 print(f"Node {block_id} (Parent: {parent_id}):")
                 print(f"  Keys: {keys}")
                 print(f"  Values: {values}")
-                print(f"  Children: {children}")
+                # print(f"  Children: {children}")
             except struct.error as e:
                 print(f"Error unpacking node {block_id}: {e}. Data: {node_data[:64]}...")
 
+# def print_index(filename):
+#     try:
+#         # Open the index file
+#         with open(filename, 'rb') as f:
+#             # Read and decode the header (modify based on your implementation)
+#             header = read_header(f)
+#             print(f"Index File: {filename}")
+#             print(f"Header: Magic Number: {header['magic_number']}, Root Block ID: {header['root_block_id']}, Next Block ID: {header['next_block_id']}")
+#             print("\nIndex Contents:")
+
+#             # Iterate through nodes (modify based on your implementation)
+#             while True:
+#                 node = read_node(f)  # Your function to read a single node
+#                 if not node:
+#                     break  # Stop if no more nodes
+
+#                 # Only print keys and values
+#                 keys = node['keys']
+#                 values = node['values']
+#                 for key, value in zip(keys, values):
+#                     print(f"[Key: {key}, Value: {value}]")
+
+#     except Exception as e:
+#         print(f"Error printing index: {e}")
