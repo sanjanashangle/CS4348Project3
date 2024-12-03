@@ -42,3 +42,21 @@
 ### Progress:
 - Finished the 'Search Key' and 'Print Index'
 - Most componenets are fully functional, just need to do last minute verifications before submitting now
+
+----------------------------
+
+## December
+
+### Thoughts so far:
+- Going good so far - making good progress
+- I would say I'm in a good place as I am not procrastinating
+
+### Plan for the session:
+- The last things I have to implement are:
+    - Fix the load command
+    - Fix the extract command
+
+- After this my code is fully finished!
+
+### Progress:
+- Will update after my session
