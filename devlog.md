@@ -59,4 +59,4 @@
 - After this my code is fully finished!
 
 ### Progress:
-- Will update after my session
+- Load command is fully functional, just have a little bit work on the extract command left. But I am stopping for the night and will continue in the morning
