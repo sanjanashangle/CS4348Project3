@@ -45,7 +45,7 @@
 
 ----------------------------
 
-## December
+## December 3 12:45AM
 
 ### Thoughts so far:
 - Going good so far - making good progress
