@@ -118,3 +118,26 @@
 - Extract command is fully functional now!
 - I was able to do a few test runs and everything is looking good! I don't have any errors with any of the commands
 - Next session I want to review everything one more time and then submit!
+
+----------------------------
+
+## December 8 9:59PM
+
+### Thoughts so far:
+- I am finished with the project!
+
+### Plan for the session:
+- Run a few tests and make sure everything is functional!
+- Create the README file!
+
+### Progress:
+- Just running tests!
+
+----------------------------
+
+## December 3 11:03PM (Done for the session)
+
+### Progress:
+- I finished making the README file
+- I ran multiple tests to ensure everything worked!
+- About to submit my project!

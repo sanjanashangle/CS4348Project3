@@ -1,57 +1,124 @@
 import os
-from index_file import create_index_file, open_index_file, insert_key_value
+from index_file import create_index_file, open_index_file, insert_key_value, MAGIC_NUMBER, print_index
 from btree import BTree
+import struct 
 
 # Create an instance of the BTree class
 btree = BTree()
 
+# Global variable to store the index filename
+index_filename = ""
+
 def print_menu():
     """Display the menu options."""
     print("\n--- B-Tree Index File Menu ---")
-    print("1. Create Index File")
-    print("2. Open Index File")
-    print("3. Insert Key-Value Pair")
-    print("4. Search Key")
-    print("5. Load Key-Value Pairs from File")
-    print("6. Print Index")
-    print("7. Extract Key-Value Pairs to File")
-    print("8. Quit")
+    print("CREATE   : Create a new index file")
+    print("OPEN     : Open an existing index file")
+    print("INSERT   : Insert a key-value pair")
+    print("SEARCH   : Search for a key")
+    print("LOAD     : Load key-value pairs from a file")
+    print("PRINT    : Print the key-value pairs in the index")
+    print("EXTRACT  : Extract key-value pairs to a file")
+    print("QUIT     : Exit the program")
 
-
-def load_key_value_pairs(input_filename, index_filename):
-    """Read a file of comma-separated unsigned integers and insert each pair into the B-tree index."""
-    print(f"Loading key-value pairs from {input_filename} into {index_filename}...")
+def open_index_file(filename):
+    """Open an existing B-Tree index file."""
     try:
-        with open(input_filename, 'r') as input_file:
-            for line_number, line in enumerate(input_file, start=1):
-                line = line.strip()
-                if not line:
-                    continue  # Skip empty lines
-
-                try:
-                    # Ensure the line contains exactly two integers
-                    parts = line.split(',')
-                    if len(parts) != 2:
-                        raise ValueError("Line does not contain exactly two values.")
-                    
-                    key, value = map(int, parts)
-                    if key < 0 or value < 0:
-                        raise ValueError("Key and value must be unsigned integers.")
-
-                    # Insert the key-value pair into the index file
-                    insert_key_value(index_filename, key, value)
-                    print(f"Inserted pair (Key: {key}, Value: {value}) from line {line_number}.")
-                
-                except ValueError as ve:
-                    print(f"Skipping line {line_number}: {line} - {ve}")
-                    continue
+        with open(filename, 'rb') as f:
+            # Read the magic number from the header
+            magic_number = f.read(8)
+            
+            # Check if the magic number is valid
+            if magic_number != MAGIC_NUMBER:
+                print(f"Error: Invalid magic number in {filename}.")
+                return None
+            
+            # If the magic number matches, return a success message
+            print(f"Index file {filename} opened successfully.")
+            return filename  # Return the filename to indicate the file is opened
 
     except FileNotFoundError:
-        print(f"Error: Input file '{input_filename}' not found.")
+        print(f"Error: The file {filename} does not exist.")
+        return None
+
+def load_key_value_pairs_from_binary(file_name):
+    try:
+        with open(file_name, 'rb') as f:
+            while True:
+                # Read the key and value (assuming they are both 8-byte integers)
+                data = f.read(16)  # Read 16 bytes (8 for key, 8 for value)
+                if len(data) < 16:  # End of file or incomplete data
+                    break
+                
+                # Unpack the data into key and value (assuming big-endian format)
+                key, value = struct.unpack('>QQ', data)  # 'Q' is for unsigned long long (8 bytes)
+                
+                if key == 0 and value == 0:
+                    print("Warning: Invalid pair (0, 0) found, skipping.")
+                    continue
+                
+                # Insert the key-value pair into the index
+                insert_key_value(file_name, key, value)
+
+    except FileNotFoundError:
+        print(f"Error: The file {file_name} does not exist.")
+    except Exception as e:
+        print(f"Error loading binary file: {e}")
+
+
+import os
+
+def load_key_value_pairs(filename_to_load, target_filename):
+    """Load key-value pairs from a file, either binary or text."""
+    print(f"Loading key-value pairs from {filename_to_load} into {target_filename}...")
+
+    try:
+        # Try to open the file as a binary file
+        with open(filename_to_load, 'rb') as file:
+            # Attempt to read the first few bytes to determine if it's binary
+            initial_data = file.read(16)
+
+            # If it contains only numeric values that can be converted from bytes, treat it as binary
+            try:
+                # Check if the first 16 bytes can be unpacked as key-value pairs (assuming 8-byte key-value pairs)
+                if len(initial_data) == 16:
+                    load_key_value_pairs_from_binary(filename_to_load)  # Call the binary loading function
+                    return
+            except Exception:
+                pass  # If it fails, assume it is not a binary format
+
+        # If the file was not binary, try reading it as a text file
+        with open(filename_to_load, 'r') as load_file:
+            count = 0  # To count invalid (0, 0) pairs
+            for line in load_file:
+                # Read key-value pairs in text format (comma-separated)
+                key, value = map(int, line.strip().split(','))
+
+                if key == 0 and value == 0:
+                    count += 1
+                    if count > 10:  # Stop after 10 consecutive (0, 0) pairs
+                        print("Warning: Too many invalid (0, 0) pairs encountered. Stopping loading.")
+                        break
+                    continue  # Skip invalid pair and continue to next read
+                
+                # Reset invalid pair counter if a valid pair is found
+                count = 0
+
+                # Insert the key-value pair into the target index file
+                insert_key_value(target_filename, key, value)
+
+        print("Key-value pairs loaded successfully.")
+
+    except FileNotFoundError:
+        print(f"Error: File '{filename_to_load}' not found.")
+    except ValueError as e:
+        print(f"Error processing file content: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
+
 def extract_key_value_pairs(index_filename):
+    """Extract key-value pairs from the index file and save them to an output file."""
     # Prompt for file name
     output_filename = input("Enter the filename to save key-value pairs: ")
     
@@ -84,57 +151,66 @@ def extract_key_value_pairs(index_filename):
     print(f"Key-value pairs saved to {output_filename}.")
 
 
+
 def main():
+    current_file = None  # Start with no file open
+    btree = BTree()
+    
     while True:
+
         print_menu()
-        choice = input("Choose an option: ").strip().lower()
-        
-        if choice == '1':  # Create Index File
-            filename = input("Enter the filename to create: ")
-            create_index_file(filename)
-        
-        elif choice == '2':  # Open Index File
-            filename = input("Enter the filename to open: ")
-            open_index_file(filename)
-        
-        elif choice == '3':  # Insert Key-Value Pair
-            key = int(input("Enter the key (unsigned integer): "))
-            value = int(input("Enter the value (unsigned integer): "))
-            filename = input("Enter the filename to insert into: ")  # Prompt for the filename
-            btree.insert(filename, key, value)  # Use the correct filename here
+        command = input("Choose an option: ").strip().lower()
 
-        
-        elif choice == '4':  # Search Key
-            key = int(input("Enter the key to search for: "))
-            filename = input("Enter the filename to search in: ")  # Prompt for the filename
-            btree.search(filename, key)
-        
-        elif choice == '5':  # Load Key-Value Pairs from File
-            input_filename = input("Enter the name of the file to load from: ")
-            index_filename = input("Enter the name of the index file to insert into: ")
-            try:
-                load_key_value_pairs(input_filename, index_filename)
-            except Exception as e:
-                print(f"An error occurred: {e}")
+        if command == "create":
+            filename = input("Enter the filename to create: ").strip()
+            new_file = create_index_file(filename)
+            if new_file:
+                current_file = new_file  # Update the currently open file
 
-        
-        elif choice == '6':  # Print Index
-            filename = input("Enter the filename to print: ")  # Prompt for the filename
-            btree.print_tree(filename)  # Pass the filename to print_tree
-
-        
-        elif choice == '7':  # Extract Key-Value Pairs to File
-            if not index_filename:  # Check if index_filename is set
-                print("Please open or create an index file first.")
+        elif command == "open":
+            filename = input("Enter the filename to open: ").strip()
+            current_file = open_index_file(filename)
+            if current_file:
+                print(f"Current file set to {current_file}")
             else:
-                extract_key_value_pairs(index_filename)
+                print("Failed to open the file.")
         
-        elif choice == '8':  # Quit
-            print("Exiting the program.")
+        elif command == "insert":
+            if current_file is None:
+                print("Error: No index file is currently open.")
+            else:
+                key = int(input("Enter the key (unsigned integer): "))
+                value = int(input("Enter the value (unsigned integer): "))
+                insert_key_value(current_file, key, value)
+        elif command == "search":
+            if current_file is None:
+                print("Error: No index file is currently open.")
+            else:
+                key = int(input("Enter the key to search for: "))
+                btree.search(current_file, key)
+        elif command == "load":
+            if not current_file:
+                print("Error: No index file is currently open.")
+                continue
+            filename_to_load = input("Enter the name of the file to load from: ").strip()
+            # Call the load function to insert key-value pairs from the source file
+            load_key_value_pairs(filename_to_load, current_file)
+        elif command == "print":
+            if current_file is None:
+                print("Error: No index file is currently open.")
+            else:
+                print_index(current_file)
+        elif command == "extract":
+            if current_file is None:
+                print("Error: No index file is currently open.")
+            else:
+                extract_file = input("Enter the name of the file to save to: ").strip()
+                extract_key_value_pairs(current_file, extract_file)
+        elif command == "quit":
+            print("Exiting the program. Goodbye!")
             break
-        
         else:
-            print("Invalid option, please try again.")
+            print("Invalid command. Please try again.")
 
 if __name__ == "__main__":
     main()

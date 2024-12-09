@@ -12,6 +12,15 @@ NODE_SIZE = struct.calcsize(NODE_FORMAT)
 
 def create_index_file(filename):
     """Create a new B-Tree index file."""
+    import os  # Ensure os is imported for file existence checks
+
+    # Check if the file exists and prompt for overwrite
+    if os.path.exists(filename):
+        overwrite = input(f"The file '{filename}' already exists. Do you want to overwrite it? (yes/no): ").strip().lower()
+        if overwrite != "yes":
+            print(f"File '{filename}' was not overwritten.")
+            return None
+
     with open(filename, 'wb') as f:
         # Write the header
         magic_number = MAGIC_NUMBER
@@ -39,6 +48,7 @@ def create_index_file(filename):
         f.write(root_node)
 
     print(f"Index file {filename} created.")
+    return filename  # Return the filename if created successfully
 
 
 def open_index_file(filename):
@@ -88,6 +98,14 @@ def insert_key_value(filename, key, value):
         f.write(new_header)
 
         print(f"Key-value pair ({key}, {value}) inserted into the index.")
+
+# def insert_key_value(filename, key, value):
+#     """Insert a key-value pair into the binary file."""
+#     with open(filename, 'ab') as file:  # 'ab' mode for appending binary data
+#         file.write(key.to_bytes(8, 'big'))  # Write key as 8-byte integer
+#         file.write(value.to_bytes(8, 'big'))  # Write value as 8-byte integer
+#     print(f"Key-value pair ({key}, {value}) inserted into the index.")
+
 
 
 def print_index(filename):
