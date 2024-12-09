@@ -68,7 +68,7 @@
 - Finished the 'Search Key' and 'Print Index'
 - Goal accomplished for the session! Went a little above my goal as I made sure the Search command was fully functional too!
 
-----------------------------FIX FROM ABOVE
+----------------------------
 
 ## December 3 12:45AM
 
