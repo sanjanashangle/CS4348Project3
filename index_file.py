@@ -1,7 +1,6 @@
 import os
 import struct
 
-# Constants for the file structure
 MAGIC_NUMBER = b"4337PRJ3"  # 8-byte magic number
 BLOCK_SIZE = 512  # Each block is 512 bytes
 HEADER_FORMAT = '8s Q Q'  # Magic number, root node ID, next block ID
@@ -12,9 +11,8 @@ NODE_SIZE = struct.calcsize(NODE_FORMAT)
 
 def create_index_file(filename):
     """Create a new B-Tree index file."""
-    import os  # Ensure os is imported for file existence checks
+    import os
 
-    # Check if the file exists and prompt for overwrite
     if os.path.exists(filename):
         overwrite = input(f"The file '{filename}' already exists. Do you want to overwrite it? (yes/no): ").strip().lower()
         if overwrite != "yes":
@@ -22,14 +20,12 @@ def create_index_file(filename):
             return None
 
     with open(filename, 'wb') as f:
-        # Write the header
         magic_number = MAGIC_NUMBER
-        root_block_id = 1  # Set the root block ID to 1 (valid block ID)
-        next_block_id = 2  # Set the next block ID to 2
+        root_block_id = 1  
+        next_block_id = 2  
         header = struct.pack(HEADER_FORMAT, magic_number, root_block_id, next_block_id)
         f.write(header)
 
-        # Write the root node (block 1, initialized with empty values)
         block_id = 1
         parent_id = 0
         num_keys = 0
@@ -48,7 +44,7 @@ def create_index_file(filename):
         f.write(root_node)
 
     print(f"Index file {filename} created.")
-    return filename  # Return the filename if created successfully
+    return filename 
 
 
 def open_index_file(filename):
@@ -70,63 +66,45 @@ def open_index_file(filename):
 def insert_key_value(filename, key, value):
     """Insert a key-value pair into the index file."""
     with open(filename, 'rb+') as f:
-        # Read the header
         f.seek(0)
         header = f.read(HEADER_SIZE)
         magic_number, root_block_id, next_block_id = struct.unpack(HEADER_FORMAT, header)
 
-        # Ensure keys and values are packed correctly
         key_packed = struct.pack('Q', key) + b'\0' * (152 - 8)  # 152 bytes for key
         value_packed = struct.pack('Q', value) + b'\0' * (152 - 8)  # 152 bytes for value
         children = b'\0' * 160  # Placeholder for child pointers
 
-        # Pack the node with key-value pair (1 key, 1 value)
         node_data = struct.pack(
             NODE_FORMAT, next_block_id, root_block_id, 1, key_packed, value_packed, children
         )
 
-        # Ensure padding to 512 bytes
-        node_data = node_data + b'\0' * (BLOCK_SIZE - len(node_data))  # Pad to 512 bytes
+        node_data = node_data + b'\0' * (BLOCK_SIZE - len(node_data))  
 
-        # Write the new node to the file at the next available block
         f.seek(next_block_id * BLOCK_SIZE)
         f.write(node_data)
 
-        # Update the header with the new next_block_id
         f.seek(0)
         new_header = struct.pack(HEADER_FORMAT, MAGIC_NUMBER, root_block_id, next_block_id + 1)
         f.write(new_header)
 
         print(f"Key-value pair ({key}, {value}) inserted into the index.")
 
-# def insert_key_value(filename, key, value):
-#     """Insert a key-value pair into the binary file."""
-#     with open(filename, 'ab') as file:  # 'ab' mode for appending binary data
-#         file.write(key.to_bytes(8, 'big'))  # Write key as 8-byte integer
-#         file.write(value.to_bytes(8, 'big'))  # Write value as 8-byte integer
-#     print(f"Key-value pair ({key}, {value}) inserted into the index.")
-
-
 
 def print_index(filename):
     """Print the B-Tree index structure."""
     with open(filename, 'rb') as f:
-        # Read and display the header
         f.seek(0)
         header = f.read(HEADER_SIZE)
         magic_number, root_block_id, next_block_id = struct.unpack(HEADER_FORMAT, header)
         print(f"Header: Magic Number: {magic_number}, Root Block ID: {root_block_id}, Next Block ID: {next_block_id}")
 
-        # Iterate through all blocks
         for block_id in range(root_block_id, next_block_id):
             f.seek(block_id * BLOCK_SIZE)
             node_data = f.read(BLOCK_SIZE)
 
             try:
-                # Unpack the node
                 block_id, parent_id, num_keys, raw_keys, raw_values, raw_children = struct.unpack(NODE_FORMAT, node_data[:NODE_SIZE])
 
-                # Extract keys and values based on `num_keys`
                 keys = [
                     int.from_bytes(raw_keys[i:i+8], 'little')
                     for i in range(0, num_keys * 8, 8)
@@ -146,28 +124,3 @@ def print_index(filename):
                 # print(f"  Children: {children}")
             except struct.error as e:
                 print(f"Error unpacking node {block_id}: {e}. Data: {node_data[:64]}...")
-
-# def print_index(filename):
-#     try:
-#         # Open the index file
-#         with open(filename, 'rb') as f:
-#             # Read and decode the header (modify based on your implementation)
-#             header = read_header(f)
-#             print(f"Index File: {filename}")
-#             print(f"Header: Magic Number: {header['magic_number']}, Root Block ID: {header['root_block_id']}, Next Block ID: {header['next_block_id']}")
-#             print("\nIndex Contents:")
-
-#             # Iterate through nodes (modify based on your implementation)
-#             while True:
-#                 node = read_node(f)  # Your function to read a single node
-#                 if not node:
-#                     break  # Stop if no more nodes
-
-#                 # Only print keys and values
-#                 keys = node['keys']
-#                 values = node['values']
-#                 for key, value in zip(keys, values):
-#                     print(f"[Key: {key}, Value: {value}]")
-
-#     except Exception as e:
-#         print(f"Error printing index: {e}")
