@@ -101,7 +101,7 @@
 ## December 3 3:27PM
 
 ### Thoughts so far:
-- Almost there! Haven't had any 'new' thoughts since my last session.
+- Almost there! I am having some trouble converting the binary file now actally...currently working to fix this.
 
 ### Plan for the session:
 - Continue working on the extract command and resolving the errors I face when running this command
@@ -109,3 +109,12 @@
 
 ### Progress:
 - Working right now - will update with new entry below
+
+----------------------------
+
+## December 3 6:03PM (Done for the session)
+
+### Progress:
+- Extract command is fully functional now!
+- I was able to do a few test runs and everything is looking good! I don't have any errors with any of the commands
+- Next session I want to review everything one more time and then submit!
